@@ -5,12 +5,17 @@
 //  Created by Pol Moya Betriu on 4/9/24.
 //
 
-import Foundation
-
 import SwiftUI
+import AVKit
+
+// Definimos los tipos de medios que pueden ser imagen o video
+enum MediaType {
+    case image(URL)      // Imagen de alta calidad
+    case video(URL)        // URL del video que se reproducirá
+}
 
 struct Post: Identifiable {
-    let id = UUID() // Esto hace que cada `Post` tenga un identificador único.
-    let media: Image // Representa la imagen asociada a la publicación.
-    let mediaURL: URL // La URL de la imagen o video.
+    let id = UUID()        // Identificador único
+    let media: MediaType   // El tipo de media (imagen o video)
 }
+

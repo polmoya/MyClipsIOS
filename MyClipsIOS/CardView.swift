@@ -6,46 +6,98 @@
 //
 
 import SwiftUI
+import AVKit
+
+struct FullScreenVideoPlayer: UIViewControllerRepresentable {
+    let player: AVPlayer
+
+    func makeUIViewController(context: Context) -> AVPlayerViewController {
+        let controller = AVPlayerViewController()
+        controller.player = player
+        controller.showsPlaybackControls = true  // Mostrar los controles del reproductor
+        return controller
+    }
+
+    func updateUIViewController(_ uiViewController: AVPlayerViewController, context: Context) {
+        // No necesitamos hacer actualizaciones específicas
+    }
+}
+
 
 struct CardView: View {
     let post: Post
-    
+    @State private var player: AVPlayer? = nil
+
     var body: some View {
         VStack {
-            post.media
-                .resizable()
-                .aspectRatio(contentMode: .fill)
-                .frame(height: 250)
-                .clipped()
+            switch post.media {
+            case .image(let imageURL):
+                // Usamos AsyncImage para cargar la imagen desde la URL
+                AsyncImage(url: imageURL) { phase in
+                    switch phase {
+                    case .empty:
+                        ProgressView() // Muestra un indicador de carga
+                            .frame(height: 250)
+                    case .success(let image):
+                        image
+                            .resizable()
+                            .aspectRatio(contentMode: .fill)
+                            .frame(height: 250)
+                            .clipped()
+                    case .failure:
+                        // En caso de error al cargar la imagen
+                        Image(systemName: "xmark.circle")
+                            .resizable()
+                            .frame(width: 50, height: 50)
+                            .foregroundColor(.red)
+                    @unknown default:
+                        EmptyView()
+                    }
+                }
+                
+            case .video(let videoURL):
+                if let player = player {
+                    FullScreenVideoPlayer(player: player)
+                        .frame(height: 250)
+                        .cornerRadius(10)
+                        .onAppear {
+                            player.play()
+                        }
+                } else {
+                    Color.gray.frame(height: 250)
+                        .onAppear {
+                            player = AVPlayer(url: videoURL)
+                        }
+                }
+            }
             
             HStack(spacing: 20) {
                 Button(action: shareToInstagram) {
-                    Text("Share to Instagram")
-                        .foregroundColor(.white)
-                        .padding()
+                    Text("Instagram")
                         .frame(maxWidth: .infinity)
+                        .padding()
                         .background(Color.blue)
-                        .cornerRadius(8)
+                        .foregroundColor(.white)
+                        .cornerRadius(10)
                 }
                 
                 Button(action: shareToTwitter) {
-                    Text("Share to Twitter")
-                        .foregroundColor(.white)
-                        .padding()
+                    Text("Twitter")
                         .frame(maxWidth: .infinity)
+                        .padding()
                         .background(Color.teal)
-                        .cornerRadius(8)
+                        .foregroundColor(.white)
+                        .cornerRadius(10)
                 }
             }
             .padding(.horizontal)
-            .padding(.top, 10)
         }
         .background(Color.white)
-        .cornerRadius(10)
+        .cornerRadius(12)
         .shadow(radius: 5)
-        .padding(.horizontal)
+        .padding()
     }
-    
+
     private func shareToInstagram() {
         guard let url = URL(string: "instagram://app") else { return }
         if UIApplication.shared.canOpenURL(url) {
@@ -54,7 +106,7 @@ struct CardView: View {
             print("Instagram no está instalado")
         }
     }
-    
+
     private func shareToTwitter() {
         guard let url = URL(string: "twitter://app") else { return }
         if UIApplication.shared.canOpenURL(url) {

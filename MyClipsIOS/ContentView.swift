@@ -9,8 +9,8 @@ import SwiftUI
 
 struct ContentView: View {
     let posts: [Post] = [
-        Post(media: Image("exampleImage1"), mediaURL: URL(string: "https://example.com/image1")!),
-        Post(media: Image("exampleImage2"), mediaURL: URL(string: "https://example.com/image2")!)
+        Post(media: .image(URL(string: "https://aguacatec.es/wp-content/uploads/2023/10/e5a978b8-6772-4c85-a50e-15581af7d483.png")!)),
+        Post(media: .video(URL(string: "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerEscapes.mp4")!))
     ]
     
     var body: some View {
@@ -23,5 +23,12 @@ struct ContentView: View {
             .padding(.vertical)
         }
         .background(Color(.systemGray6).edgesIgnoringSafeArea(.all))
+    }
+}
+
+
+struct ContentView_Previews: PreviewProvider {
+    static var previews: some View {
+        ContentView()
     }
 }
