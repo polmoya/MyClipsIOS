@@ -14,6 +14,8 @@
 		5BF58AE92C88A66B00A4098B /* MyClipsIOSTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5BF58AE82C88A66B00A4098B /* MyClipsIOSTests.swift */; };
 		5BF58AF32C88A66B00A4098B /* MyClipsIOSUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5BF58AF22C88A66B00A4098B /* MyClipsIOSUITests.swift */; };
 		5BF58AF52C88A66B00A4098B /* MyClipsIOSUITestsLaunchTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5BF58AF42C88A66B00A4098B /* MyClipsIOSUITestsLaunchTests.swift */; };
+		5BF58B022C88AB9300A4098B /* CardView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5BF58B012C88AB9300A4098B /* CardView.swift */; };
+		5BF58B042C88AC3800A4098B /* Post.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5BF58B032C88AC3800A4098B /* Post.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -44,6 +46,8 @@
 		5BF58AEE2C88A66B00A4098B /* MyClipsIOSUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = MyClipsIOSUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		5BF58AF22C88A66B00A4098B /* MyClipsIOSUITests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MyClipsIOSUITests.swift; sourceTree = "<group>"; };
 		5BF58AF42C88A66B00A4098B /* MyClipsIOSUITestsLaunchTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MyClipsIOSUITestsLaunchTests.swift; sourceTree = "<group>"; };
+		5BF58B012C88AB9300A4098B /* CardView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CardView.swift; sourceTree = "<group>"; };
+		5BF58B032C88AC3800A4098B /* Post.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Post.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -96,7 +100,9 @@
 			children = (
 				5BF58AD72C88A66700A4098B /* MyClipsIOSApp.swift */,
 				5BF58AD92C88A66700A4098B /* ContentView.swift */,
+				5BF58B012C88AB9300A4098B /* CardView.swift */,
 				5BF58ADB2C88A66A00A4098B /* Assets.xcassets */,
+				5BF58B052C88AC9300A4098B /* Models */,
 				5BF58ADD2C88A66A00A4098B /* Preview Content */,
 			);
 			path = MyClipsIOS;
@@ -125,6 +131,14 @@
 				5BF58AF42C88A66B00A4098B /* MyClipsIOSUITestsLaunchTests.swift */,
 			);
 			path = MyClipsIOSUITests;
+			sourceTree = "<group>";
+		};
+		5BF58B052C88AC9300A4098B /* Models */ = {
+			isa = PBXGroup;
+			children = (
+				5BF58B032C88AC3800A4098B /* Post.swift */,
+			);
+			path = Models;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -258,7 +272,9 @@
 			buildActionMask = 2147483647;
 			files = (
 				5BF58ADA2C88A66700A4098B /* ContentView.swift in Sources */,
+				5BF58B022C88AB9300A4098B /* CardView.swift in Sources */,
 				5BF58AD82C88A66700A4098B /* MyClipsIOSApp.swift in Sources */,
+				5BF58B042C88AC3800A4098B /* Post.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

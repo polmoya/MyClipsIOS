@@ -8,19 +8,20 @@
 import SwiftUI
 
 struct ContentView: View {
+    let posts: [Post] = [
+        Post(media: Image("exampleImage1"), mediaURL: URL(string: "https://example.com/image1")!),
+        Post(media: Image("exampleImage2"), mediaURL: URL(string: "https://example.com/image2")!)
+    ]
+    
     var body: some View {
-        VStack {
-            Image(systemName: "globe")
-                .imageScale(.large)
-                .foregroundColor(.accentColor)
-            Text("Hello, world!")
+        ScrollView {
+            VStack(spacing: 20) {
+                ForEach(posts) { post in
+                    CardView(post: post)
+                }
+            }
+            .padding(.vertical)
         }
-        .padding()
-    }
-}
-
-struct ContentView_Previews: PreviewProvider {
-    static var previews: some View {
-        ContentView()
+        .background(Color(.systemGray6).edgesIgnoringSafeArea(.all))
     }
 }
