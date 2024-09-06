@@ -29,7 +29,7 @@ struct CardView: View {
     @State private var player: AVPlayer? = nil
 
     var body: some View {
-        VStack {
+        VStack (alignment: .leading, spacing: 10) {
             switch post.media {
             case .image(let imageURL):
                 // Usamos AsyncImage para cargar la imagen desde la URL
@@ -60,9 +60,6 @@ struct CardView: View {
                     FullScreenVideoPlayer(player: player)
                         .frame(height: 250)
                         .cornerRadius(10)
-                        .onAppear {
-                            player.play()
-                        }
                 } else {
                     Color.gray.frame(height: 250)
                         .onAppear {
@@ -70,10 +67,17 @@ struct CardView: View {
                         }
                 }
             }
+            // Mostrar el título del post
+            Text(post.title)
+                .font(.headline)
+            // Descripción del post
+            Text(post.description)
+                .font(.subheadline)
+                .foregroundColor(.secondary)
             
             HStack(spacing: 20) {
                 Button(action: shareToInstagram) {
-                    Text("Instagram")
+                    Text("SHARE INSTAGRAM")
                         .frame(maxWidth: .infinity)
                         .padding()
                         .background(Color.blue)
@@ -82,7 +86,7 @@ struct CardView: View {
                 }
                 
                 Button(action: shareToTwitter) {
-                    Text("Twitter")
+                    Text("SHARE TWITTER")
                         .frame(maxWidth: .infinity)
                         .padding()
                         .background(Color.teal)
@@ -90,12 +94,13 @@ struct CardView: View {
                         .cornerRadius(10)
                 }
             }
-            .padding(.horizontal)
+            .padding(.top, 8) // Espacio entre la descripción y los botones
         }
-        .background(Color.white)
-        .cornerRadius(12)
-        .shadow(radius: 5)
         .padding()
+        .background(Color.white)
+        .cornerRadius(10)
+        .shadow(radius: 5)
+        .padding([.leading, .trailing, .top], 10)
     }
 
     private func shareToInstagram() {

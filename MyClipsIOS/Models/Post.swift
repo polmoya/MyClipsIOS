@@ -17,5 +17,7 @@ enum MediaType {
 struct Post: Identifiable {
     let id = UUID()        // Identificador único
     let media: MediaType   // El tipo de media (imagen o video)
+    let title: String
+    let description: String
 }
 
