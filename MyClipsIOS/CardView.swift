@@ -76,7 +76,9 @@ struct CardView: View {
                 .foregroundColor(.secondary)
             
             HStack(spacing: 20) {
-                Button(action: shareToInstagram) {
+                Button(action: {
+                    shareToInstagram(post: post)
+                }) {
                     Text("SHARE INSTAGRAM")
                         .frame(maxWidth: .infinity)
                         .padding()
@@ -85,8 +87,10 @@ struct CardView: View {
                         .cornerRadius(10)
                 }
                 
-                Button(action: shareToTwitter) {
-                    Text("SHARE TWITTER")
+                Button(action: {
+                    shareToTwitter(post: post)
+                }) {
+                    Text("SHARE\nTWITTER")
                         .frame(maxWidth: .infinity)
                         .padding()
                         .background(Color.teal)
@@ -102,17 +106,70 @@ struct CardView: View {
         .shadow(radius: 5)
         .padding([.leading, .trailing, .top], 10)
     }
-
-    private func shareToInstagram() {
-        guard let url = URL(string: "instagram://app") else { return }
-        if UIApplication.shared.canOpenURL(url) {
-            UIApplication.shared.open(url)
+    
+    private func presentDocumentController(_ documentController: UIDocumentInteractionController) {
+        if let windowScene = UIApplication.shared.connectedScenes.first as? UIWindowScene,
+           let keyWindow = windowScene.windows.first(where: { $0.isKeyWindow }) {
+            documentController.presentOpenInMenu(from: .zero, in: keyWindow, animated: true)
         } else {
-            print("Instagram no está instalado")
+            print("No se pudo encontrar la ventana principal")
         }
     }
 
-    private func shareToTwitter() {
+
+    // Función para compartir en Instagram
+        private func shareToInstagram(post: Post) {
+            guard let instagramURL = URL(string: "instagram://app") else { return }
+            
+            if UIApplication.shared.canOpenURL(instagramURL) {
+                switch post.media {
+                case .image(let imageURL):
+                    if let imageData = try? Data(contentsOf: imageURL),
+                       let image = UIImage(data: imageData) {
+                        saveAndShareImageToInstagram(image: image)
+                    }
+                case .video(let videoURL):
+                    shareVideoToInstagram(videoURL: videoURL)
+                }
+            } else {
+                print("Instagram no está instalado")
+            }
+        }
+        
+        private func saveAndShareImageToInstagram(image: UIImage) {
+            let tempDirectory = FileManager.default.temporaryDirectory
+            let imagePath = tempDirectory.appendingPathComponent("tempImage.ig")
+
+            do {
+                try image.jpegData(compressionQuality: 1.0)?.write(to: imagePath)
+
+                let documentController = UIDocumentInteractionController(url: imagePath)
+                documentController.uti = "com.instagram.exclusivegram"
+                presentDocumentController(documentController)
+            } catch {
+                print("Error al guardar la imagen: \(error.localizedDescription)")
+            }
+        }
+        
+        private func shareVideoToInstagram(videoURL: URL) {
+            let tempDirectory = FileManager.default.temporaryDirectory
+            let videoPath = tempDirectory.appendingPathComponent("tempVideo.ig.mp4")
+
+            do {
+                try FileManager.default.copyItem(at: videoURL, to: videoPath)
+
+                let documentController = UIDocumentInteractionController(url: videoPath)
+                documentController.uti = "com.instagram.exclusivegram.video"
+                presentDocumentController(documentController)
+            } catch {
+                print("Error al guardar el video: \(error.localizedDescription)")
+            }
+        }
+
+    
+    
+
+    private func shareToTwitter(post: Post) {
         guard let url = URL(string: "twitter://app") else { return }
         if UIApplication.shared.canOpenURL(url) {
             UIApplication.shared.open(url)
