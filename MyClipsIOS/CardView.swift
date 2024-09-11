@@ -27,7 +27,8 @@ struct FullScreenVideoPlayer: UIViewControllerRepresentable {
 struct CardView: View {
     let post: Post
     @State private var player: AVPlayer? = nil
-
+    @Environment(\.colorScheme) var colorScheme // Detecta el tema actual (light o dark)
+    
     var body: some View {
         VStack (alignment: .leading, spacing: 10) {
             switch post.media {
@@ -97,16 +98,70 @@ struct CardView: View {
                         .foregroundColor(.white)
                         .cornerRadius(10)
                 }
+                Button(action: {
+                    downloadContent(post: post)
+                }) {
+                    Image(systemName: "arrow.down.circle")
+                        .resizable()
+                        .frame(width: 24, height: 24)
+                        .padding()
+                        .background(Color.gray)
+                        .foregroundColor(.white)
+                        .cornerRadius(10)
+                }
+                .frame(maxWidth: UIScreen.main.bounds.width * 0.2)
             }
             .padding(.top, 8) // Espacio entre la descripción y los botones
         }
         .padding()
-        .background(Color.white)
+        .background(colorScheme == .dark ? Color(.systemGray6) : Color.white) // Cambia el fondo según el tema
         .cornerRadius(10)
         .shadow(radius: 5)
         .padding([.leading, .trailing, .top], 10)
     }
     
+    private func downloadContent(post: Post) {
+        switch post.media {
+        case .image(let imageURL):
+            URLSession.shared.dataTask(with: imageURL) { data, response, error in
+                if let error = error {
+                    print("Error al descargar la imagen: \(error.localizedDescription)")
+                    return
+                }
+                
+                if let data = data, let image = UIImage(data: data) {
+                    UIImageWriteToSavedPhotosAlbum(image, nil, nil, nil)
+                    print("Imagen guardada")
+                } else {
+                    print("No se pudo descargar la imagen.")
+                }
+            }.resume()
+            
+        case .video(let videoURL):
+            let downloadTask = URLSession.shared.downloadTask(with: videoURL) { location, response, error in
+                if let error = error {
+                    print("Error al descargar el video: \(error.localizedDescription)")
+                    return
+                }
+                
+                guard let location = location else {
+                    print("No se pudo encontrar la ubicación temporal del video.")
+                    return
+                }
+                
+                let destination = FileManager.default.temporaryDirectory.appendingPathComponent(response?.suggestedFilename ?? videoURL.lastPathComponent)
+                do {
+                    try FileManager.default.moveItem(at: location, to: destination)
+                    UISaveVideoAtPathToSavedPhotosAlbum(destination.path, nil, nil, nil)
+                    print("Video guardado")
+                } catch {
+                    print("Error al mover el video: \(error)")
+                }
+            }
+            downloadTask.resume()
+        }
+    }
+
     private func presentDocumentController(_ documentController: UIDocumentInteractionController) {
         if let windowScene = UIApplication.shared.connectedScenes.first as? UIWindowScene,
            let keyWindow = windowScene.windows.first(where: { $0.isKeyWindow }) {
@@ -116,65 +171,95 @@ struct CardView: View {
         }
     }
 
-
     // Función para compartir en Instagram
-        private func shareToInstagram(post: Post) {
-            guard let instagramURL = URL(string: "instagram://app") else { return }
-            
-            if UIApplication.shared.canOpenURL(instagramURL) {
-                switch post.media {
-                case .image(let imageURL):
-                    if let imageData = try? Data(contentsOf: imageURL),
-                       let image = UIImage(data: imageData) {
-                        saveAndShareImageToInstagram(image: image)
-                    }
-                case .video(let videoURL):
-                    shareVideoToInstagram(videoURL: videoURL)
+    private func shareToInstagram(post: Post) {
+        guard let instagramURL = URL(string: "instagram://app") else { return }
+        
+        if UIApplication.shared.canOpenURL(instagramURL) {
+            switch post.media {
+            case .image(let imageURL):
+                if let imageData = try? Data(contentsOf: imageURL),
+                   let image = UIImage(data: imageData) {
+                    saveAndShareImageToInstagram(image: image)
                 }
-            } else {
-                print("Instagram no está instalado")
+            case .video(let videoURL):
+                shareVideoToInstagram(videoURL: videoURL)
             }
-        }
-        
-        private func saveAndShareImageToInstagram(image: UIImage) {
-            let tempDirectory = FileManager.default.temporaryDirectory
-            let imagePath = tempDirectory.appendingPathComponent("tempImage.ig")
-
-            do {
-                try image.jpegData(compressionQuality: 1.0)?.write(to: imagePath)
-
-                let documentController = UIDocumentInteractionController(url: imagePath)
-                documentController.uti = "com.instagram.exclusivegram"
-                presentDocumentController(documentController)
-            } catch {
-                print("Error al guardar la imagen: \(error.localizedDescription)")
-            }
-        }
-        
-        private func shareVideoToInstagram(videoURL: URL) {
-            let tempDirectory = FileManager.default.temporaryDirectory
-            let videoPath = tempDirectory.appendingPathComponent("tempVideo.ig.mp4")
-
-            do {
-                try FileManager.default.copyItem(at: videoURL, to: videoPath)
-
-                let documentController = UIDocumentInteractionController(url: videoPath)
-                documentController.uti = "com.instagram.exclusivegram.video"
-                presentDocumentController(documentController)
-            } catch {
-                print("Error al guardar el video: \(error.localizedDescription)")
-            }
-        }
-
-    
-    
-
-    private func shareToTwitter(post: Post) {
-        guard let url = URL(string: "twitter://app") else { return }
-        if UIApplication.shared.canOpenURL(url) {
-            UIApplication.shared.open(url)
         } else {
-            print("Twitter no está instalado")
+            print("Instagram no está instalado")
         }
     }
+    
+    private func saveAndShareImageToInstagram(image: UIImage) {
+        let tempDirectory = FileManager.default.temporaryDirectory
+        let imagePath = tempDirectory.appendingPathComponent("tempImage.ig")
+
+        do {
+            try image.jpegData(compressionQuality: 1.0)?.write(to: imagePath)
+
+            let documentController = UIDocumentInteractionController(url: imagePath)
+            documentController.uti = "com.instagram.exclusivegram"
+            presentDocumentController(documentController)
+        } catch {
+            print("Error al guardar la imagen: \(error.localizedDescription)")
+        }
+    }
+    
+    private func shareVideoToInstagram(videoURL: URL) {
+        let tempDirectory = FileManager.default.temporaryDirectory
+        let videoPath = tempDirectory.appendingPathComponent("tempVideo.ig.mp4")
+
+        do {
+            try FileManager.default.copyItem(at: videoURL, to: videoPath)
+
+            let documentController = UIDocumentInteractionController(url: videoPath)
+            documentController.uti = "com.instagram.exclusivegram.video"
+            presentDocumentController(documentController)
+        } catch {
+            print("Error al guardar el video: \(error.localizedDescription)")
+        }
+    }
+
+    // Función para compartir en Twitter
+    private func shareToTwitter(post: Post) {
+        // Obtener la escena activa de la ventana
+        guard let windowScene = UIApplication.shared.connectedScenes.first as? UIWindowScene,
+              let keyWindow = windowScene.windows.first(where: { $0.isKeyWindow }),
+              let rootViewController = keyWindow.rootViewController else {
+            print("No se pudo encontrar la ventana principal.")
+            return
+        }
+
+        // Selección de media: imagen o video
+        switch post.media {
+        case .image(let imageURL):
+            // Cargar la imagen de forma asíncrona
+            URLSession.shared.dataTask(with: imageURL) { data, response, error in
+                if let error = error {
+                    print("Error al descargar la imagen: \(error)")
+                    return
+                }
+                
+                guard let data = data, let image = UIImage(data: data) else {
+                    print("No se pudo cargar la imagen.")
+                    return
+                }
+                
+                // Volver al hilo principal para actualizar la interfaz de usuario
+                DispatchQueue.main.async {
+                    let activityVC = UIActivityViewController(activityItems: [image], applicationActivities: nil)
+                    rootViewController.present(activityVC, animated: true, completion: nil)
+                }
+            }.resume()
+
+        case .video(let videoURL):
+            // No necesitamos descargar el video, solo compartir el URL
+            DispatchQueue.main.async {
+                let activityVC = UIActivityViewController(activityItems: [videoURL], applicationActivities: nil)
+                rootViewController.present(activityVC, animated: true, completion: nil)
+            }
+        }
+    }
+
+
 }

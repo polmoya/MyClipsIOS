@@ -36,6 +36,7 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
+		5BA54F792C91F3C400C1C60D /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
 		5BF58AD42C88A66700A4098B /* MyClipsIOS.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = MyClipsIOS.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		5BF58AD72C88A66700A4098B /* MyClipsIOSApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MyClipsIOSApp.swift; sourceTree = "<group>"; };
 		5BF58AD92C88A66700A4098B /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
@@ -98,6 +99,7 @@
 		5BF58AD62C88A66700A4098B /* MyClipsIOS */ = {
 			isa = PBXGroup;
 			children = (
+				5BA54F792C91F3C400C1C60D /* Info.plist */,
 				5BF58AD72C88A66700A4098B /* MyClipsIOSApp.swift */,
 				5BF58AD92C88A66700A4098B /* ContentView.swift */,
 				5BF58B012C88AB9300A4098B /* CardView.swift */,
@@ -436,6 +438,7 @@
 				DEVELOPMENT_TEAM = LN9B6P532K;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = MyClipsIOS/Info.plist;
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
@@ -465,6 +468,7 @@
 				DEVELOPMENT_TEAM = LN9B6P532K;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = MyClipsIOS/Info.plist;
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
