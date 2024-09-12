@@ -43,7 +43,7 @@ struct CardView: View {
                         image
                             .resizable()
                             .aspectRatio(contentMode: .fill)
-                            .frame(height: 250)
+                            .frame(maxWidth: UIScreen.main.bounds.width - 20, maxHeight: 250)
                             .clipped()
                     case .failure:
                         // En caso de error al cargar la imagen
