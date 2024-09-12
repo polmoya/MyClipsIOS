@@ -71,10 +71,11 @@ struct CardView: View {
             // Mostrar el título del post
             Text(post.title)
                 .font(.headline)
+                .foregroundColor(Color.white)
             // Descripción del post
             Text(post.description)
                 .font(.subheadline)
-                .foregroundColor(.secondary)
+                .foregroundColor(Color.white)
             
             HStack(spacing: 20) {
                 Button(action: {
@@ -82,40 +83,56 @@ struct CardView: View {
                 }) {
                     Text("SHARE INSTAGRAM")
                         .frame(maxWidth: .infinity)
-                        .padding()
-                        .background(Color.blue)
+                        .padding(10)
+                        .background(Color("cardBckgrnd"))
                         .foregroundColor(.white)
                         .cornerRadius(10)
+                            .overlay(
+                                RoundedRectangle(cornerRadius: 10)
+                                    .stroke(Color("mainColor"), lineWidth: 2)
+                            )
                 }
                 
                 Button(action: {
                     shareToTwitter(post: post)
                 }) {
-                    Text("SHARE\nTWITTER")
+                    Text("SHARE\nX")
                         .frame(maxWidth: .infinity)
-                        .padding()
-                        .background(Color.teal)
+                        .padding(10)
+                        .background(Color("cardBckgrnd"))
                         .foregroundColor(.white)
                         .cornerRadius(10)
+                            .overlay(
+                                RoundedRectangle(cornerRadius: 10)
+                                    .stroke(Color("mainColor"), lineWidth: 2)
+                            )
                 }
                 Button(action: {
                     downloadContent(post: post)
                 }) {
                     Image(systemName: "arrow.down.circle")
                         .resizable()
-                        .frame(width: 24, height: 24)
-                        .padding()
-                        .background(Color.gray)
+                        .frame(width: 20, height: 20)
+                        .padding(10)
+                        .background(Color("cardBckgrnd"))
                         .foregroundColor(.white)
                         .cornerRadius(10)
+                            .overlay(
+                                RoundedRectangle(cornerRadius: 10)
+                                    .stroke(Color("mainColor"), lineWidth: 2)
+                            )
                 }
-                .frame(maxWidth: UIScreen.main.bounds.width * 0.2)
+                .frame(maxWidth: UIScreen.main.bounds.width * 0.1)
             }
             .padding(.top, 8) // Espacio entre la descripción y los botones
         }
         .padding()
-        .background(colorScheme == .dark ? Color(.systemGray6) : Color.white) // Cambia el fondo según el tema
+        .background(Color("cardBckgrnd"))
         .cornerRadius(10)
+            .overlay(
+                RoundedRectangle(cornerRadius: 10)
+                    .stroke(Color.white, lineWidth: 2)
+            )
         .shadow(radius: 5)
         .padding([.leading, .trailing, .top], 10)
     }

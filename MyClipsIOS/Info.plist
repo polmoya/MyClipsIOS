@@ -8,5 +8,12 @@
 	<string>Esta aplicación necesita acceso a la biblioteca de fotos para guardar imágenes o videos.</string>
 	<key>NSPhotoLibraryUsageDescription</key>
 	<string>Esta aplicación necesita acceder a tu biblioteca de fotos para mostrar y gestionar contenido multimedia.</string>
+    <key>UIApplicationSceneManifest</key>
+        <dict>
+            <key>UIApplicationSupportsMultipleScenes</key>
+            <true/>
+            <key>UISceneConfigurations</key>
+            <dict/>
+        </dict>
 </dict>
 </plist>

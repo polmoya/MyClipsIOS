@@ -17,6 +17,10 @@ struct ContentView: View {
             media: .video(URL(string: "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerEscapes.mp4")!),
             title: "Post 2",
             description: "Description of the second post."),
+        Post(
+            media: .image(URL(string: "https://media.gettyimages.com/id/1231536207/photo/european-athletics-indoor-championships-day-1-session-2.jpg?s=594x594&w=gi&k=20&c=g2LMbchCTGRk8qYHvzCmMwBfGHIlirG-d2rmY7fMKjU=")!),
+            title: "Post 3",
+            description: "Description of the third post. The last but not least post"),
     ]
     
     var body: some View {
@@ -28,7 +32,7 @@ struct ContentView: View {
             }
             .padding(.vertical)
         }
-        .background(Color(.systemGray6).edgesIgnoringSafeArea(.all))
+        .background(Color(.black).edgesIgnoringSafeArea(.all))
     }
 }
 
