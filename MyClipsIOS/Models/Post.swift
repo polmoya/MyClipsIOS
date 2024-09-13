@@ -5,19 +5,25 @@
 //  Created by Pol Moya Betriu on 4/9/24.
 //
 
+import Foundation
 import SwiftUI
 import AVKit
 
-// Definimos los tipos de medios que pueden ser imagen o video
 enum MediaType {
-    case image(URL)      // Imagen de alta calidad
-    case video(URL)        // URL del video que se reproducirá
+    case image(URL)
+    case video(URL)
 }
 
 struct Post: Identifiable {
-    let id = UUID()        // Identificador único
-    let media: MediaType   // El tipo de media (imagen o video)
+    let id = UUID()
+    let media: MediaType
     let title: String
     let description: String
-}
+    let date: String
 
+    var parsedDate: Date? {
+        let dateFormatter = DateFormatter()
+        dateFormatter.dateFormat = "yyyy-MM-dd HH:mm:ss"
+        return dateFormatter.date(from: date)
+    }
+}
