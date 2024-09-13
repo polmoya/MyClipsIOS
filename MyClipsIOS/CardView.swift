@@ -247,6 +247,9 @@ struct CardView: View {
             return
         }
 
+        // Texto adicional para el post
+        let postText = "Check out my clip from #bakuriani2025"
+
         // Selección de media: imagen o video
         switch post.media {
         case .image(let imageURL):
@@ -261,10 +264,14 @@ struct CardView: View {
                     print("No se pudo cargar la imagen.")
                     return
                 }
-                
+
                 // Volver al hilo principal para actualizar la interfaz de usuario
                 DispatchQueue.main.async {
-                    let activityVC = UIActivityViewController(activityItems: [image], applicationActivities: nil)
+                    let activityVC = UIActivityViewController(activityItems: [image, postText], applicationActivities: nil)
+                    
+                    // Excluir otras actividades
+                    activityVC.excludedActivityTypes = [.postToFacebook, .postToWeibo, .message]
+                    
                     rootViewController.present(activityVC, animated: true, completion: nil)
                 }
             }.resume()
@@ -272,11 +279,16 @@ struct CardView: View {
         case .video(let videoURL):
             // No necesitamos descargar el video, solo compartir el URL
             DispatchQueue.main.async {
-                let activityVC = UIActivityViewController(activityItems: [videoURL], applicationActivities: nil)
+                let activityVC = UIActivityViewController(activityItems: [videoURL, postText], applicationActivities: nil)
+                
+                // Excluir otras actividades si es necesario
+                activityVC.excludedActivityTypes = [.postToFacebook, .postToWeibo, .message]
+                
                 rootViewController.present(activityVC, animated: true, completion: nil)
             }
         }
     }
+
 
 
 }
