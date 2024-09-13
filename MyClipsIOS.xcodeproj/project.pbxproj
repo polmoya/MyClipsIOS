@@ -47,7 +47,7 @@
 		5BF58AEE2C88A66B00A4098B /* MyClipsIOSUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = MyClipsIOSUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		5BF58AF22C88A66B00A4098B /* MyClipsIOSUITests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MyClipsIOSUITests.swift; sourceTree = "<group>"; };
 		5BF58AF42C88A66B00A4098B /* MyClipsIOSUITestsLaunchTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MyClipsIOSUITestsLaunchTests.swift; sourceTree = "<group>"; };
-		5BF58B012C88AB9300A4098B /* CardView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CardView.swift; sourceTree = "<group>"; };
+		5BF58B012C88AB9300A4098B /* CardView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CardView.swift; sourceTree = "<group>"; tabWidth = 4; };
 		5BF58B032C88AC3800A4098B /* Post.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Post.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 

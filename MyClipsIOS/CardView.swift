@@ -237,7 +237,6 @@ struct CardView: View {
         }
     }
 
-    // Función para compartir en Twitter
     private func shareToTwitter(post: Post) {
         // Obtener la escena activa de la ventana
         guard let windowScene = UIApplication.shared.connectedScenes.first as? UIWindowScene,
@@ -250,11 +249,21 @@ struct CardView: View {
         // Texto adicional para el post
         let postText = "Check out my clip from #bakuriani2025"
 
+        // Función para presentar el UIActivityViewController
+        func presentActivityView(with items: [Any]) {
+            DispatchQueue.main.async {
+                let activityVC = UIActivityViewController(activityItems: items, applicationActivities: nil)
+                // Excluir otras actividades
+                activityVC.excludedActivityTypes = [.postToFacebook, .postToWeibo, .message]
+                rootViewController.present(activityVC, animated: true, completion: nil)
+            }
+        }
+
         // Selección de media: imagen o video
         switch post.media {
         case .image(let imageURL):
             // Cargar la imagen de forma asíncrona
-            URLSession.shared.dataTask(with: imageURL) { data, response, error in
+            URLSession.shared.dataTask(with: imageURL) { data, _, error in
                 if let error = error {
                     print("Error al descargar la imagen: \(error)")
                     return
@@ -265,30 +274,12 @@ struct CardView: View {
                     return
                 }
 
-                // Volver al hilo principal para actualizar la interfaz de usuario
-                DispatchQueue.main.async {
-                    let activityVC = UIActivityViewController(activityItems: [image, postText], applicationActivities: nil)
-                    
-                    // Excluir otras actividades
-                    activityVC.excludedActivityTypes = [.postToFacebook, .postToWeibo, .message]
-                    
-                    rootViewController.present(activityVC, animated: true, completion: nil)
-                }
+                presentActivityView(with: [image, postText])
             }.resume()
 
         case .video(let videoURL):
-            // No necesitamos descargar el video, solo compartir el URL
-            DispatchQueue.main.async {
-                let activityVC = UIActivityViewController(activityItems: [videoURL, postText], applicationActivities: nil)
-                
-                // Excluir otras actividades si es necesario
-                activityVC.excludedActivityTypes = [.postToFacebook, .postToWeibo, .message]
-                
-                rootViewController.present(activityVC, animated: true, completion: nil)
-            }
+            presentActivityView(with: [videoURL, postText])
         }
     }
-
-
 
 }
