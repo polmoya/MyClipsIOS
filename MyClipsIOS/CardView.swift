@@ -254,7 +254,22 @@ struct CardView: View {
             DispatchQueue.main.async {
                 let activityVC = UIActivityViewController(activityItems: items, applicationActivities: nil)
                 // Excluir otras actividades
-                activityVC.excludedActivityTypes = [.postToFacebook, .postToWeibo, .message]
+                activityVC.excludedActivityTypes = [
+                    .postToFacebook,
+                    .postToWeibo,
+                    .message,
+                    .mail,
+                    .airDrop,
+                    .copyToPasteboard,       // This excludes copying to the pasteboard (Notes can be a part of this)
+                    .addToReadingList,       // Excludes adding to Reading List (sometimes associated with Notes)
+                    .saveToCameraRoll,       // If saving to camera roll is not desired
+                    .openInIBooks,           // Excludes opening in iBooks
+                    .postToFlickr,           // Excludes posting to Flickr
+                    .postToVimeo,            // Excludes posting to Vimeo
+                    .postToTencentWeibo,     // Excludes posting to Tencent Weibo
+                    .assignToContact,
+                    .print,
+                ]
                 rootViewController.present(activityVC, animated: true, completion: nil)
             }
         }
