@@ -147,13 +147,16 @@ struct CardView: View {
     }
     
     private func presentDocumentController(_ documentController: UIDocumentInteractionController) {
-        if let windowScene = UIApplication.shared.connectedScenes.first as? UIWindowScene,
-           let keyWindow = windowScene.windows.first(where: { $0.isKeyWindow }) {
-            documentController.presentOpenInMenu(from: .zero, in: keyWindow, animated: true)
-        } else {
-            print("No se pudo encontrar la ventana principal")
+            guard let windowScene = UIApplication.shared.connectedScenes.first as? UIWindowScene,
+                  let keyWindow = windowScene.windows.first(where: { $0.isKeyWindow }),
+                  let rootViewController = keyWindow.rootViewController else {
+                print("No se pudo encontrar la ventana principal")
+                return
+            }
+
+            let rect = CGRect(x: keyWindow.frame.midX, y: keyWindow.frame.midY, width: 0, height: 0)
+            documentController.presentOpenInMenu(from: rect, in: rootViewController.view, animated: true)
         }
-    }
 
     // Función para compartir en Instagram
     private func shareToInstagram(post: Post) {
@@ -180,29 +183,38 @@ struct CardView: View {
 
         do {
             try image.jpegData(compressionQuality: 1.0)?.write(to: imagePath)
-
-            let documentController = UIDocumentInteractionController(url: imagePath)
-            documentController.uti = "com.instagram.exclusivegram"
-            presentDocumentController(documentController)
+            
+            if FileManager.default.fileExists(atPath: imagePath.path) {
+                let documentController = UIDocumentInteractionController(url: imagePath)
+                documentController.uti = "com.instagram.exclusivegram"
+                presentDocumentController(documentController)
+            } else {
+                print("Image file does not exist at path: \(imagePath.path)")
+            }
         } catch {
             print("Error al guardar la imagen: \(error.localizedDescription)")
         }
     }
-    
+
     private func shareVideoToInstagram(videoURL: URL) {
         let tempDirectory = FileManager.default.temporaryDirectory
         let videoPath = tempDirectory.appendingPathComponent("tempVideo.ig.mp4")
 
         do {
             try FileManager.default.copyItem(at: videoURL, to: videoPath)
-
-            let documentController = UIDocumentInteractionController(url: videoPath)
-            documentController.uti = "com.instagram.exclusivegram.video"
-            presentDocumentController(documentController)
+            
+            if FileManager.default.fileExists(atPath: videoPath.path) {
+                let documentController = UIDocumentInteractionController(url: videoPath)
+                documentController.uti = "com.instagram.exclusivegram.video"
+                presentDocumentController(documentController)
+            } else {
+                print("Video file does not exist at path: \(videoPath.path)")
+            }
         } catch {
             print("Error al guardar el video: \(error.localizedDescription)")
         }
     }
+
 
     private func shareToTwitter(post: Post) {
         // Obtener la escena activa de la ventana

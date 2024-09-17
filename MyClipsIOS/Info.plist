@@ -14,26 +14,5 @@
     <string>Esta aplicación necesita acceso a la biblioteca de fotos para guardar imágenes o videos.</string>
     <key>NSPhotoLibraryUsageDescription</key>
     <string>Esta aplicación necesita acceder a tu biblioteca de fotos para mostrar y gestionar contenido multimedia.</string>
-    <key>UIApplicationSceneManifest</key>
-    <dict>
-        <key>UIApplicationSupportsTabbedSceneCollection</key>
-        <false/>
-        <key>UIApplicationSupportsMultipleScenes</key>
-        <false/>
-        <key>UISceneConfigurations</key>
-        <dict>
-            <key>UIWindowSceneSessionRoleApplication</key>
-            <array>
-                <dict>
-                    <key>UISceneClassName</key>
-                    <string>UIWindowScene</string>
-                    <key>UISceneDelegateClassName</key>
-                    <string>YourAppSceneDelegate</string> <!-- Replace with your actual scene delegate class name -->
-                    <key>UISceneConfigurationName</key>
-                    <string>Default Configuration</string>
-                </dict>
-            </array>
-        </dict>
-    </dict>
 </dict>
 </plist>
