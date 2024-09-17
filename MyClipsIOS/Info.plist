@@ -2,18 +2,38 @@
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
 <dict>
-	<key>Bundle identifier</key>
-	<string></string>
-	<key>NSPhotoLibraryAddUsageDescription</key>
-	<string>Esta aplicación necesita acceso a la biblioteca de fotos para guardar imágenes o videos.</string>
-	<key>NSPhotoLibraryUsageDescription</key>
-	<string>Esta aplicación necesita acceder a tu biblioteca de fotos para mostrar y gestionar contenido multimedia.</string>
+    <key>LSApplicationQueriesSchemes</key>
+    <array>
+        <string>instagram</string>
+        <string>twitter</string>
+        <string>instagram-stories</string>
+    </array>
+    <key>CFBundleIdentifier</key>
+    <string>sporteurope.MyClipsIOS</string>
+    <key>NSPhotoLibraryAddUsageDescription</key>
+    <string>Esta aplicación necesita acceso a la biblioteca de fotos para guardar imágenes o videos.</string>
+    <key>NSPhotoLibraryUsageDescription</key>
+    <string>Esta aplicación necesita acceder a tu biblioteca de fotos para mostrar y gestionar contenido multimedia.</string>
     <key>UIApplicationSceneManifest</key>
+    <dict>
+        <key>UIApplicationSupportsTabbedSceneCollection</key>
+        <false/>
+        <key>UIApplicationSupportsMultipleScenes</key>
+        <false/>
+        <key>UISceneConfigurations</key>
         <dict>
-            <key>UIApplicationSupportsMultipleScenes</key>
-            <true/>
-            <key>UISceneConfigurations</key>
-            <dict/>
+            <key>UIWindowSceneSessionRoleApplication</key>
+            <array>
+                <dict>
+                    <key>UISceneClassName</key>
+                    <string>UIWindowScene</string>
+                    <key>UISceneDelegateClassName</key>
+                    <string>YourAppSceneDelegate</string> <!-- Replace with your actual scene delegate class name -->
+                    <key>UISceneConfigurationName</key>
+                    <string>Default Configuration</string>
+                </dict>
+            </array>
         </dict>
+    </dict>
 </dict>
 </plist>

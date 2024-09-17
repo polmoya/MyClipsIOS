@@ -27,7 +27,7 @@ struct FullScreenVideoPlayer: UIViewControllerRepresentable {
 struct CardView: View {
     let post: Post
     @State private var player: AVPlayer? = nil
-    @Environment(\.colorScheme) var colorScheme // Detecta el tema actual (light o dark)
+    @StateObject private var viewModel = DownloadViewModel()
     
     var body: some View {
         VStack (alignment: .leading, spacing: 10) {
@@ -108,7 +108,7 @@ struct CardView: View {
                             )
                 }
                 Button(action: {
-                    downloadContent(post: post)
+                    viewModel.downloadContent(post: post)
                 }) {
                     Image(systemName: "arrow.down.circle")
                         .resizable()
@@ -123,6 +123,15 @@ struct CardView: View {
                             )
                 }
                 .frame(maxWidth: UIScreen.main.bounds.width * 0.1)
+                .alert(isPresented: $viewModel.showAlert) {
+                    Alert(title: Text("Download Status"), message: Text(viewModel.alertMessage), dismissButton: .default(Text("OK")))
+                }
+                .confirmationDialog(viewModel.alertMessage, isPresented: $viewModel.showConfirmation, titleVisibility: .visible) {
+                    Button("Download Again") {
+                        viewModel.confirmDownload(post: post)
+                    }
+                    Button("Cancel", role: .cancel) { }
+                }
             }
             .padding(.top, 8) // Espacio entre la descripción y los botones
         }
@@ -137,48 +146,6 @@ struct CardView: View {
         .padding([.leading, .trailing, .top], 10)
     }
     
-    private func downloadContent(post: Post) {
-        switch post.media {
-        case .image(let imageURL):
-            URLSession.shared.dataTask(with: imageURL) { data, response, error in
-                if let error = error {
-                    print("Error al descargar la imagen: \(error.localizedDescription)")
-                    return
-                }
-                
-                if let data = data, let image = UIImage(data: data) {
-                    UIImageWriteToSavedPhotosAlbum(image, nil, nil, nil)
-                    print("Imagen guardada")
-                } else {
-                    print("No se pudo descargar la imagen.")
-                }
-            }.resume()
-            
-        case .video(let videoURL):
-            let downloadTask = URLSession.shared.downloadTask(with: videoURL) { location, response, error in
-                if let error = error {
-                    print("Error al descargar el video: \(error.localizedDescription)")
-                    return
-                }
-                
-                guard let location = location else {
-                    print("No se pudo encontrar la ubicación temporal del video.")
-                    return
-                }
-                
-                let destination = FileManager.default.temporaryDirectory.appendingPathComponent(response?.suggestedFilename ?? videoURL.lastPathComponent)
-                do {
-                    try FileManager.default.moveItem(at: location, to: destination)
-                    UISaveVideoAtPathToSavedPhotosAlbum(destination.path, nil, nil, nil)
-                    print("Video guardado")
-                } catch {
-                    print("Error al mover el video: \(error)")
-                }
-            }
-            downloadTask.resume()
-        }
-    }
-
     private func presentDocumentController(_ documentController: UIDocumentInteractionController) {
         if let windowScene = UIApplication.shared.connectedScenes.first as? UIWindowScene,
            let keyWindow = windowScene.windows.first(where: { $0.isKeyWindow }) {
