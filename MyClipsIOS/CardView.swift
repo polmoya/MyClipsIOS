@@ -146,74 +146,58 @@ struct CardView: View {
         .padding([.leading, .trailing, .top], 10)
     }
     
-    private func presentDocumentController(_ documentController: UIDocumentInteractionController) {
-            guard let windowScene = UIApplication.shared.connectedScenes.first as? UIWindowScene,
-                  let keyWindow = windowScene.windows.first(where: { $0.isKeyWindow }),
-                  let rootViewController = keyWindow.rootViewController else {
-                print("No se pudo encontrar la ventana principal")
-                return
-            }
-
-            let rect = CGRect(x: keyWindow.frame.midX, y: keyWindow.frame.midY, width: 0, height: 0)
-            documentController.presentOpenInMenu(from: rect, in: rootViewController.view, animated: true)
-        }
-
-    // Función para compartir en Instagram
     private func shareToInstagram(post: Post) {
-        guard let instagramURL = URL(string: "instagram://app") else { return }
-        
-        if UIApplication.shared.canOpenURL(instagramURL) {
             switch post.media {
             case .image(let imageURL):
-                if let imageData = try? Data(contentsOf: imageURL),
-                   let image = UIImage(data: imageData) {
-                    saveAndShareImageToInstagram(image: image)
-                }
+                openInstagramWithImage(imageURL: imageURL)
             case .video(let videoURL):
-                shareVideoToInstagram(videoURL: videoURL)
+                openInstagramWithVideo(videoURL: videoURL)
             }
-        } else {
-            print("Instagram no está instalado")
         }
-    }
-    
-    private func saveAndShareImageToInstagram(image: UIImage) {
-        let tempDirectory = FileManager.default.temporaryDirectory
-        let imagePath = tempDirectory.appendingPathComponent("tempImage.ig")
 
-        do {
-            try image.jpegData(compressionQuality: 1.0)?.write(to: imagePath)
-            
-            if FileManager.default.fileExists(atPath: imagePath.path) {
-                let documentController = UIDocumentInteractionController(url: imagePath)
-                documentController.uti = "com.instagram.exclusivegram"
-                presentDocumentController(documentController)
-            } else {
-                print("Image file does not exist at path: \(imagePath.path)")
+        private func openInstagramWithImage(imageURL: URL) {
+            let tempDirectory = FileManager.default.temporaryDirectory
+            let imagePath = tempDirectory.appendingPathComponent("tempImage.ig")
+
+            do {
+                try Data(contentsOf: imageURL).write(to: imagePath)
+                
+                if FileManager.default.fileExists(atPath: imagePath.path) {
+                    let instagramURL = URL(string: "instagram://library?AssetPath=\(imagePath.path)")!
+                    if UIApplication.shared.canOpenURL(instagramURL) {
+                        UIApplication.shared.open(instagramURL, options: [:], completionHandler: nil)
+                    } else {
+                        print("Instagram is not installed.")
+                    }
+                } else {
+                    print("Image file does not exist at path: \(imagePath.path)")
+                }
+            } catch {
+                print("Error saving the image: \(error.localizedDescription)")
             }
-        } catch {
-            print("Error al guardar la imagen: \(error.localizedDescription)")
         }
-    }
 
-    private func shareVideoToInstagram(videoURL: URL) {
-        let tempDirectory = FileManager.default.temporaryDirectory
-        let videoPath = tempDirectory.appendingPathComponent("tempVideo.ig.mp4")
+        private func openInstagramWithVideo(videoURL: URL) {
+            let tempDirectory = FileManager.default.temporaryDirectory
+            let videoPath = tempDirectory.appendingPathComponent("tempVideo.ig.mp4")
 
-        do {
-            try FileManager.default.copyItem(at: videoURL, to: videoPath)
-            
-            if FileManager.default.fileExists(atPath: videoPath.path) {
-                let documentController = UIDocumentInteractionController(url: videoPath)
-                documentController.uti = "com.instagram.exclusivegram.video"
-                presentDocumentController(documentController)
-            } else {
-                print("Video file does not exist at path: \(videoPath.path)")
+            do {
+                try FileManager.default.copyItem(at: videoURL, to: videoPath)
+                
+                if FileManager.default.fileExists(atPath: videoPath.path) {
+                    let instagramURL = URL(string: "instagram://library?AssetPath=\(videoPath.path)")!
+                    if UIApplication.shared.canOpenURL(instagramURL) {
+                        UIApplication.shared.open(instagramURL, options: [:], completionHandler: nil)
+                    } else {
+                        print("Instagram is not installed.")
+                    }
+                } else {
+                    print("Video file does not exist at path: \(videoPath.path)")
+                }
+            } catch {
+                print("Error saving the video: \(error.localizedDescription)")
             }
-        } catch {
-            print("Error al guardar el video: \(error.localizedDescription)")
         }
-    }
 
 
     private func shareToTwitter(post: Post) {
