@@ -7,6 +7,8 @@
 
 import SwiftUI
 import AVKit
+import UIKit
+import Foundation
 
 struct FullScreenVideoPlayer: UIViewControllerRepresentable {
     let player: AVPlayer
@@ -147,49 +149,78 @@ struct CardView: View {
     }
     
     private func shareToInstagram(post: Post) {
-            switch post.media {
-            case .image(let imageURL):
-                openInstagramWithImage(imageURL: imageURL)
-            case .video(let videoURL):
-                openInstagramWithVideo(videoURL: videoURL)
-            }
+        switch post.media {
+        case .image(let imageURL):
+            openInstagramWithImage(imageURL: imageURL)
+        case .video(let videoURL):
+            openInstagramWithVideo(videoURL: videoURL)
         }
+    }
 
-        private func openInstagramWithImage(imageURL: URL) {
-            let tempDirectory = FileManager.default.temporaryDirectory
-            let imagePath = tempDirectory.appendingPathComponent("tempImage.ig")
+    private func openInstagramWithImage(imageURL: URL) {
+        let tempDirectory = FileManager.default.temporaryDirectory
+        let imagePath = tempDirectory.appendingPathComponent("tempImage.ig")
 
-            do {
-                try Data(contentsOf: imageURL).write(to: imagePath)
-                
-                if FileManager.default.fileExists(atPath: imagePath.path) {
-                    let instagramURL = URL(string: "instagram://library?AssetPath=\(imagePath.path)")!
-                    if UIApplication.shared.canOpenURL(instagramURL) {
-                        UIApplication.shared.open(instagramURL, options: [:], completionHandler: nil)
-                    } else {
-                        print("Instagram is not installed.")
-                    }
+        do {
+            try Data(contentsOf: imageURL).write(to: imagePath)
+            
+            if FileManager.default.fileExists(atPath: imagePath.path) {
+                let instagramURL = URL(string: "instagram://library?AssetPath=\(imagePath.path)")!
+                if UIApplication.shared.canOpenURL(instagramURL) {
+                    UIApplication.shared.open(instagramURL, options: [:], completionHandler: nil)
                 } else {
-                    print("Image file does not exist at path: \(imagePath.path)")
+                    print("Instagram is not installed.")
                 }
-            } catch {
-                print("Error saving the image: \(error.localizedDescription)")
+            } else {
+                print("Image file does not exist at path: \(imagePath.path)")
             }
+        } catch {
+            print("Error saving the image: \(error.localizedDescription)")
         }
+    }
 
-        private func openInstagramWithVideo(videoURL: URL) {
-            let tempDirectory = FileManager.default.temporaryDirectory
-            let videoPath = tempDirectory.appendingPathComponent("tempVideo.ig.mp4")
+    private func openInstagramWithVideo(videoURL: URL) {
+        let tempDirectory = FileManager.default.temporaryDirectory
+        let videoName = "tempVideo.ig.mp4"
+        let videoPath = tempDirectory.appendingPathComponent(videoName)
+
+        URLSession.shared.downloadTask(with: videoURL) { (tempFileURL, response, error) in
+            if let error = error {
+                print("Error downloading the video: \(error.localizedDescription)")
+                return
+            }
+            guard let tempFileURL = tempFileURL else {
+                print("No temp file URL found.")
+                return
+            }
+
+            if FileManager.default.fileExists(atPath: videoPath.path) {
+                do {
+                    try FileManager.default.removeItem(at: videoPath)
+                    print("Removed existing video file at path: \(videoPath.path)")
+                } catch {
+                    print("Error removing existing video file: \(error.localizedDescription)")
+                    return
+                }
+            }
 
             do {
-                try FileManager.default.copyItem(at: videoURL, to: videoPath)
-                
+                try FileManager.default.copyItem(at: tempFileURL, to: videoPath)
+
                 if FileManager.default.fileExists(atPath: videoPath.path) {
-                    let instagramURL = URL(string: "instagram://library?AssetPath=\(videoPath.path)")!
-                    if UIApplication.shared.canOpenURL(instagramURL) {
-                        UIApplication.shared.open(instagramURL, options: [:], completionHandler: nil)
-                    } else {
-                        print("Instagram is not installed.")
+                    let instagramURL = URL(string: "instagram://library?AssetPath=\(videoPath.path.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed) ?? "")")!
+                    DispatchQueue.main.async {
+                        if UIApplication.shared.canOpenURL(instagramURL) {
+                            UIApplication.shared.open(instagramURL, options: [:], completionHandler: { success in
+                                if success {
+                                    // Eliminar archivo temporal después de compartir
+                                    try? FileManager.default.removeItem(at: videoPath)
+                                    print("Shared and removed video at path: \(videoPath.path)")
+                                }
+                            })
+                        } else {
+                            print("Instagram is not installed.")
+                        }
                     }
                 } else {
                     print("Video file does not exist at path: \(videoPath.path)")
@@ -197,7 +228,11 @@ struct CardView: View {
             } catch {
                 print("Error saving the video: \(error.localizedDescription)")
             }
-        }
+        }.resume()
+    }
+
+
+
 
 
     private func shareToTwitter(post: Post) {
@@ -223,15 +258,17 @@ struct CardView: View {
                     .message,
                     .mail,
                     .airDrop,
-                    .copyToPasteboard,       // This excludes copying to the pasteboard (Notes can be a part of this)
-                    .addToReadingList,       // Excludes adding to Reading List (sometimes associated with Notes)
-                    .saveToCameraRoll,       // If saving to camera roll is not desired
-                    .openInIBooks,           // Excludes opening in iBooks
-                    .postToFlickr,           // Excludes posting to Flickr
-                    .postToVimeo,            // Excludes posting to Vimeo
-                    .postToTencentWeibo,     // Excludes posting to Tencent Weibo
+                    .copyToPasteboard,
+                    .addToReadingList,
+                    .saveToCameraRoll,
+                    .openInIBooks,
+                    .postToFlickr,
+                    .postToVimeo,
+                    .postToTencentWeibo,
                     .assignToContact,
                     .print,
+                    .openInIBooks,
+                    .sharePlay
                 ]
                 rootViewController.present(activityVC, animated: true, completion: nil)
             }
@@ -256,8 +293,31 @@ struct CardView: View {
             }.resume()
 
         case .video(let videoURL):
-            presentActivityView(with: [videoURL, postText])
+            // Descargar el video
+            URLSession.shared.dataTask(with: videoURL) { data, _, error in
+                if let error = error {
+                    print("Error al descargar el video: \(error)")
+                    return
+                }
+                
+                guard let data = data else {
+                    print("No se pudo cargar el video.")
+                    return
+                }
+
+                // Crear un archivo temporal para el video
+                let tempDirectory = FileManager.default.temporaryDirectory
+                let tempVideoURL = tempDirectory.appendingPathComponent("tempVideo.mp4")
+
+                do {
+                    // Escribir los datos del video en el archivo temporal
+                    try data.write(to: tempVideoURL)
+                    // Preparar el archivo para compartir
+                    presentActivityView(with: [tempVideoURL, postText])
+                } catch {
+                    print("Error al guardar el video: \(error.localizedDescription)")
+                }
+            }.resume()
         }
     }
-
 }
