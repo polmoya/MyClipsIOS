@@ -206,54 +206,69 @@ struct CardView: View {
     }
 
     private func openInstagramWithVideo(videoURL: URL) {
-        // Descargar y guardar el video en el álbum de fotos
-        URLSession.shared.downloadTask(with: videoURL) { tempFileURL, response, error in
+        let videoName = UUID().uuidString + ".mp4"
+        let fileManager = FileManager.default
+        let documentsDirectory = fileManager.urls(for: .documentDirectory, in: .userDomainMask).first!
+        let videoPath = documentsDirectory.appendingPathComponent(videoName)
+        
+        URLSession.shared.downloadTask(with: videoURL) { (tempFileURL, response, error) in
             if let error = error {
-                print("Error al descargar el video: \(error.localizedDescription)")
+                print("Error downloading the video: \(error.localizedDescription)")
                 return
             }
             guard let tempFileURL = tempFileURL else {
-                print("No se encontró la URL del archivo temporal.")
+                print("No temp file URL found.")
                 return
             }
-            
-            // Solicitar acceso al álbum de fotos
-            PHPhotoLibrary.requestAuthorization { status in
-                if status == .authorized {
-                    // Guardar el video en el álbum de fotos
-                    PHPhotoLibrary.shared().performChanges({
-                        PHAssetChangeRequest.creationRequestForAssetFromVideo(atFileURL: tempFileURL)
-                    }) { success, error in
-                        if success {
-                            print("Video guardado en el álbum de fotos.")
-                            
-                            // Abrir Instagram y compartir el video
-                            DispatchQueue.main.async {
-                                if let instagramURL = URL(string: "instagram://library?AssetPath=\(videoURL.path)") {
-                                    if UIApplication.shared.canOpenURL(instagramURL) {
-                                        UIApplication.shared.open(instagramURL, options: [:], completionHandler: nil)
-                                    } else {
-                                        print("Instagram no está instalado.")
-                                        
-                                    }
-                                    
-                                }
-                                
-                            }
-                            
-                        }
-                        else if let error = error {
-                            print("Error al guardar el video: \(error.localizedDescription)")
-                        }
-                    }
-                }  
-                else {
-                    print("Acceso al álbum de fotos denegado.")
+
+            do {
+                // Remove any file that may already exist at this path
+                if fileManager.fileExists(atPath: videoPath.path) {
+                    try fileManager.removeItem(at: videoPath)
                 }
+
+                // Move the downloaded file to the permanent location
+                try fileManager.copyItem(at: tempFileURL, to: videoPath)
+
+                // Save the video to Photos library
+                PHPhotoLibrary.requestAuthorization { status in
+                    if status == .authorized {
+                        PHPhotoLibrary.shared().performChanges({
+                            let creationRequest = PHAssetCreationRequest.forAsset()
+                            creationRequest.addResource(with: .video, fileURL: videoPath, options: nil)
+                        }) { success, error in
+                            if success {
+                                print("Successfully saved the video to Photos library.")
+                                DispatchQueue.main.async {
+                                    // Wait a moment to ensure the video is available in the Photos library
+                                    DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) {
+                                        let instagramURL = URL(string: "instagram://library?AssetPath=\(videoPath.path.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed) ?? "")")!
+                                        if UIApplication.shared.canOpenURL(instagramURL) {
+                                            UIApplication.shared.open(instagramURL, options: [:], completionHandler: { success in
+                                                if success {
+                                                    print("Successfully shared the video!")
+                                                } else {
+                                                    print("Failed to open Instagram.")
+                                                }
+                                            })
+                                        } else {
+                                            print("Instagram is not installed.")
+                                        }
+                                    }
+                                }
+                            } else {
+                                print("Failed to save the video: \(String(describing: error))")
+                            }
+                        }
+                    } else {
+                        print("Photo library access denied.")
+                    }
+                }
+            } catch {
+                print("Error handling the video file: \(error.localizedDescription)")
             }
         }.resume()
     }
-
 
 
     private func shareToTwitter(post: Post) {
