@@ -9,6 +9,8 @@ import SwiftUI
 import AVKit
 import UIKit
 import Foundation
+import Photos
+
 
 struct FullScreenVideoPlayer: UIViewControllerRepresentable {
     let player: AVPlayer
@@ -57,17 +59,20 @@ struct CardView: View {
                         EmptyView()
                     }
                 }
+                .id(post.id)
                 
             case .video(let videoURL):
                 if let player = player {
                     FullScreenVideoPlayer(player: player)
                         .frame(height: 250)
                         .cornerRadius(10)
+                        .id(post.id)
                 } else {
                     Color.gray.frame(height: 250)
                         .onAppear {
                             player = AVPlayer(url: videoURL)
                         }
+                        .id(post.id)
                 }
             }
             // Mostrar el título del post
@@ -158,80 +163,96 @@ struct CardView: View {
     }
 
     private func openInstagramWithImage(imageURL: URL) {
-        let tempDirectory = FileManager.default.temporaryDirectory
-        let imagePath = tempDirectory.appendingPathComponent("tempImage.ig")
-
-        do {
-            try Data(contentsOf: imageURL).write(to: imagePath)
-            
-            if FileManager.default.fileExists(atPath: imagePath.path) {
-                let instagramURL = URL(string: "instagram://library?AssetPath=\(imagePath.path)")!
-                if UIApplication.shared.canOpenURL(instagramURL) {
-                    UIApplication.shared.open(instagramURL, options: [:], completionHandler: nil)
-                } else {
-                    print("Instagram is not installed.")
-                }
-            } else {
-                print("Image file does not exist at path: \(imagePath.path)")
-            }
-        } catch {
-            print("Error saving the image: \(error.localizedDescription)")
-        }
-    }
-
-    private func openInstagramWithVideo(videoURL: URL) {
-        let tempDirectory = FileManager.default.temporaryDirectory
-        let videoName = "tempVideo.ig.mp4"
-        let videoPath = tempDirectory.appendingPathComponent(videoName)
-
-        URLSession.shared.downloadTask(with: videoURL) { (tempFileURL, response, error) in
+        // Descargar y guardar la imagen en el álbum de fotos
+        URLSession.shared.dataTask(with: imageURL) { data, response, error in
             if let error = error {
-                print("Error downloading the video: \(error.localizedDescription)")
+                print("Error al descargar la imagen: \(error.localizedDescription)")
                 return
             }
-            guard let tempFileURL = tempFileURL else {
-                print("No temp file URL found.")
+            guard let data = data, let image = UIImage(data: data) else {
+                print("No se pudo obtener la imagen desde la URL.")
                 return
             }
-
-            if FileManager.default.fileExists(atPath: videoPath.path) {
-                do {
-                    try FileManager.default.removeItem(at: videoPath)
-                    print("Removed existing video file at path: \(videoPath.path)")
-                } catch {
-                    print("Error removing existing video file: \(error.localizedDescription)")
-                    return
-                }
-            }
-
-            do {
-                try FileManager.default.copyItem(at: tempFileURL, to: videoPath)
-
-                if FileManager.default.fileExists(atPath: videoPath.path) {
-                    let instagramURL = URL(string: "instagram://library?AssetPath=\(videoPath.path.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed) ?? "")")!
-                    DispatchQueue.main.async {
-                        if UIApplication.shared.canOpenURL(instagramURL) {
-                            UIApplication.shared.open(instagramURL, options: [:], completionHandler: { success in
-                                if success {
-                                    // Eliminar archivo temporal después de compartir
-                                    try? FileManager.default.removeItem(at: videoPath)
-                                    print("Shared and removed video at path: \(videoPath.path)")
+            
+            // Solicitar acceso al álbum de fotos
+            PHPhotoLibrary.requestAuthorization { status in
+                if status == .authorized {
+                    // Guardar la imagen en el álbum de fotos
+                    PHPhotoLibrary.shared().performChanges({
+                        PHAssetChangeRequest.creationRequestForAsset(from: image)
+                    }) { success, error in
+                        if success {
+                            print("Imagen guardada en el álbum de fotos.")
+                            
+                            // Abrir Instagram y compartir la imagen
+                            DispatchQueue.main.async {
+                                if let instagramURL = URL(string: "instagram://library?AssetPath=\(imageURL.path)") {
+                                    if UIApplication.shared.canOpenURL(instagramURL) {
+                                        UIApplication.shared.open(instagramURL, options: [:], completionHandler: nil)
+                                    } else {
+                                        print("Instagram no está instalado.")
+                                    }
                                 }
-                            })
-                        } else {
-                            print("Instagram is not installed.")
+                            }
+                        } else if let error = error {
+                            print("Error al guardar la imagen: \(error.localizedDescription)")
                         }
                     }
                 } else {
-                    print("Video file does not exist at path: \(videoPath.path)")
+                    print("Acceso al álbum de fotos denegado.")
                 }
-            } catch {
-                print("Error saving the video: \(error.localizedDescription)")
             }
         }.resume()
     }
 
-
+    private func openInstagramWithVideo(videoURL: URL) {
+        // Descargar y guardar el video en el álbum de fotos
+        URLSession.shared.downloadTask(with: videoURL) { tempFileURL, response, error in
+            if let error = error {
+                print("Error al descargar el video: \(error.localizedDescription)")
+                return
+            }
+            guard let tempFileURL = tempFileURL else {
+                print("No se encontró la URL del archivo temporal.")
+                return
+            }
+            
+            // Solicitar acceso al álbum de fotos
+            PHPhotoLibrary.requestAuthorization { status in
+                if status == .authorized {
+                    // Guardar el video en el álbum de fotos
+                    PHPhotoLibrary.shared().performChanges({
+                        PHAssetChangeRequest.creationRequestForAssetFromVideo(atFileURL: tempFileURL)
+                    }) { success, error in
+                        if success {
+                            print("Video guardado en el álbum de fotos.")
+                            
+                            // Abrir Instagram y compartir el video
+                            DispatchQueue.main.async {
+                                if let instagramURL = URL(string: "instagram://library?AssetPath=\(videoURL.path)") {
+                                    if UIApplication.shared.canOpenURL(instagramURL) {
+                                        UIApplication.shared.open(instagramURL, options: [:], completionHandler: nil)
+                                    } else {
+                                        print("Instagram no está instalado.")
+                                        
+                                    }
+                                    
+                                }
+                                
+                            }
+                            
+                        }
+                        else if let error = error {
+                            print("Error al guardar el video: \(error.localizedDescription)")
+                        }
+                    }
+                }  
+                else {
+                    print("Acceso al álbum de fotos denegado.")
+                }
+            }
+        }.resume()
+    }
 
 
 
