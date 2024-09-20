@@ -166,14 +166,13 @@ struct CardView: View {
         // Descargar y guardar la imagen en el álbum de fotos
         URLSession.shared.dataTask(with: imageURL) { data, response, error in
             if let error = error {
-                print("Error al descargar la imagen: \(error.localizedDescription)")
+                print("Error al downloading image: \(error.localizedDescription)")
                 return
             }
             guard let data = data, let image = UIImage(data: data) else {
                 print("No se pudo obtener la imagen desde la URL.")
                 return
             }
-            
             // Solicitar acceso al álbum de fotos
             PHPhotoLibrary.requestAuthorization { status in
                 if status == .authorized {
@@ -182,8 +181,7 @@ struct CardView: View {
                         PHAssetChangeRequest.creationRequestForAsset(from: image)
                     }) { success, error in
                         if success {
-                            print("Imagen guardada en el álbum de fotos.")
-                            
+                            print("Image downloaded successfully!")
                             // Abrir Instagram y compartir la imagen
                             DispatchQueue.main.async {
                                 if let instagramURL = URL(string: "instagram://library?AssetPath=\(imageURL.path)") {
@@ -210,7 +208,6 @@ struct CardView: View {
         let fileManager = FileManager.default
         let documentsDirectory = fileManager.urls(for: .documentDirectory, in: .userDomainMask).first!
         let videoPath = documentsDirectory.appendingPathComponent(videoName)
-        
         URLSession.shared.downloadTask(with: videoURL) { (tempFileURL, response, error) in
             if let error = error {
                 print("Error downloading the video: \(error.localizedDescription)")
@@ -220,23 +217,19 @@ struct CardView: View {
                 print("No temp file URL found.")
                 return
             }
-
             do {
                 // Remove any file that may already exist at this path
                 if fileManager.fileExists(atPath: videoPath.path) {
                     try fileManager.removeItem(at: videoPath)
                 }
-
                 // Move the downloaded file to the permanent location
                 try fileManager.copyItem(at: tempFileURL, to: videoPath)
-
                 // Save the video to Photos library and track local identifier
                 PHPhotoLibrary.requestAuthorization { status in
                     if status == .authorized {
                         PHPhotoLibrary.shared().performChanges({
                             let creationRequest = PHAssetCreationRequest.forAsset()
                             creationRequest.addResource(with: .video, fileURL: videoPath, options: nil)
-                            
                             // Capture the local identifier of the saved video
                             let localIdentifier = creationRequest.placeholderForCreatedAsset?.localIdentifier
                             
@@ -261,7 +254,6 @@ struct CardView: View {
                                     }
                                 }
                             }
-                            
                         }) { success, error in
                             if !success {
                                 print("Failed to save the video: \(String(describing: error))")
