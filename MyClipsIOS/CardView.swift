@@ -206,7 +206,7 @@ struct CardView: View {
     }
 
     private func openInstagramWithVideo(videoURL: URL) {
-        let videoName = UUID().uuidString + ".mp4"
+        let videoName = post.id.uuidString + ".mp4"
         let fileManager = FileManager.default
         let documentsDirectory = fileManager.urls(for: .documentDirectory, in: .userDomainMask).first!
         let videoPath = documentsDirectory.appendingPathComponent(videoName)
@@ -230,19 +230,21 @@ struct CardView: View {
                 // Move the downloaded file to the permanent location
                 try fileManager.copyItem(at: tempFileURL, to: videoPath)
 
-                // Save the video to Photos library
+                // Save the video to Photos library and track local identifier
                 PHPhotoLibrary.requestAuthorization { status in
                     if status == .authorized {
                         PHPhotoLibrary.shared().performChanges({
                             let creationRequest = PHAssetCreationRequest.forAsset()
                             creationRequest.addResource(with: .video, fileURL: videoPath, options: nil)
-                        }) { success, error in
-                            if success {
-                                print("Successfully saved the video to Photos library.")
-                                DispatchQueue.main.async {
-                                    // Wait a moment to ensure the video is available in the Photos library
-                                    DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) {
-                                        let instagramURL = URL(string: "instagram://library?AssetPath=\(videoPath.path.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed) ?? "")")!
+                            
+                            // Capture the local identifier of the saved video
+                            let localIdentifier = creationRequest.placeholderForCreatedAsset?.localIdentifier
+                            
+                            DispatchQueue.main.async {
+                                // Wait a moment to ensure the video is available in the Photos library
+                                DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) {
+                                    if let localIdentifier = localIdentifier {
+                                        let instagramURL = URL(string: "instagram://library?LocalIdentifier=\(localIdentifier)")!
                                         if UIApplication.shared.canOpenURL(instagramURL) {
                                             UIApplication.shared.open(instagramURL, options: [:], completionHandler: { success in
                                                 if success {
@@ -254,9 +256,14 @@ struct CardView: View {
                                         } else {
                                             print("Instagram is not installed.")
                                         }
+                                    } else {
+                                        print("Failed to retrieve localIdentifier for the video.")
                                     }
                                 }
-                            } else {
+                            }
+                            
+                        }) { success, error in
+                            if !success {
                                 print("Failed to save the video: \(String(describing: error))")
                             }
                         }
@@ -269,6 +276,7 @@ struct CardView: View {
             }
         }.resume()
     }
+
 
 
     private func shareToTwitter(post: Post) {
