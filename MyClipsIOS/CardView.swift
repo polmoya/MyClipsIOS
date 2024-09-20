@@ -27,6 +27,28 @@ struct FullScreenVideoPlayer: UIViewControllerRepresentable {
     }
 }
 
+struct ButtonStyleModifier: ViewModifier {
+    func body(content: Content) -> some View {
+        content
+            .frame(maxWidth: .infinity)
+            .padding(10)
+            .background(Color("cardBckgrnd"))
+            .foregroundColor(.white)
+            .cornerRadius(10)
+            .overlay(
+                RoundedRectangle(cornerRadius: 10)
+                    .stroke(Color("mainColor"), lineWidth: 2)
+            )
+    }
+}
+
+extension View {
+    func buttonStyle() -> some View {
+        self.modifier(ButtonStyleModifier())
+    }
+}
+
+
 
 struct CardView: View {
     let post: Post
@@ -89,46 +111,24 @@ struct CardView: View {
                     shareToInstagram(post: post)
                 }) {
                     Text("SHARE INSTAGRAM")
-                        .frame(maxWidth: .infinity)
-                        .padding(10)
-                        .background(Color("cardBckgrnd"))
-                        .foregroundColor(.white)
-                        .cornerRadius(10)
-                            .overlay(
-                                RoundedRectangle(cornerRadius: 10)
-                                    .stroke(Color("mainColor"), lineWidth: 2)
-                            )
                 }
-                
+                .buttonStyle()
+
                 Button(action: {
                     shareToTwitter(post: post)
                 }) {
                     Text("SHARE\nX")
-                        .frame(maxWidth: .infinity)
-                        .padding(10)
-                        .background(Color("cardBckgrnd"))
-                        .foregroundColor(.white)
-                        .cornerRadius(10)
-                            .overlay(
-                                RoundedRectangle(cornerRadius: 10)
-                                    .stroke(Color("mainColor"), lineWidth: 2)
-                            )
                 }
+                .buttonStyle()
+
                 Button(action: {
                     viewModel.downloadContent(post: post)
                 }) {
                     Image(systemName: "arrow.down.circle")
                         .resizable()
                         .frame(width: 20, height: 20)
-                        .padding(10)
-                        .background(Color("cardBckgrnd"))
-                        .foregroundColor(.white)
-                        .cornerRadius(10)
-                            .overlay(
-                                RoundedRectangle(cornerRadius: 10)
-                                    .stroke(Color("mainColor"), lineWidth: 2)
-                            )
                 }
+                .buttonStyle()
                 .frame(maxWidth: UIScreen.main.bounds.width * 0.1)
                 .alert(isPresented: $viewModel.showAlert) {
                     Alert(title: Text("Download Status"), message: Text(viewModel.alertMessage), dismissButton: .default(Text("OK")))
