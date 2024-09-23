@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		5B0F0B0B2CA1B5D100A5DA19 /* SocialMediaShare.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5B0F0B0A2CA1B5D100A5DA19 /* SocialMediaShare.swift */; };
 		5B8C600C2C988DE400FAD41A /* DownloadViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5B8C600B2C988DE400FAD41A /* DownloadViewModel.swift */; };
 		5BF58AD82C88A66700A4098B /* MyClipsIOSApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5BF58AD72C88A66700A4098B /* MyClipsIOSApp.swift */; };
 		5BF58ADA2C88A66700A4098B /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5BF58AD92C88A66700A4098B /* ContentView.swift */; };
@@ -37,6 +38,7 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
+		5B0F0B0A2CA1B5D100A5DA19 /* SocialMediaShare.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SocialMediaShare.swift; sourceTree = "<group>"; };
 		5B8C600B2C988DE400FAD41A /* DownloadViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DownloadViewModel.swift; sourceTree = "<group>"; };
 		5BA54F792C91F3C400C1C60D /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
 		5BF58AD42C88A66700A4098B /* MyClipsIOS.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = MyClipsIOS.app; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -109,6 +111,7 @@
 				5BF58B052C88AC9300A4098B /* Models */,
 				5BF58ADD2C88A66A00A4098B /* Preview Content */,
 				5B8C600B2C988DE400FAD41A /* DownloadViewModel.swift */,
+				5B0F0B0A2CA1B5D100A5DA19 /* SocialMediaShare.swift */,
 			);
 			path = MyClipsIOS;
 			sourceTree = "<group>";
@@ -281,6 +284,7 @@
 				5BF58AD82C88A66700A4098B /* MyClipsIOSApp.swift in Sources */,
 				5B8C600C2C988DE400FAD41A /* DownloadViewModel.swift in Sources */,
 				5BF58B042C88AC3800A4098B /* Post.swift in Sources */,
+				5B0F0B0B2CA1B5D100A5DA19 /* SocialMediaShare.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
