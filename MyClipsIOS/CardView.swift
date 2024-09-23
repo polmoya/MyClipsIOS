@@ -99,31 +99,28 @@ struct CardView: View {
                         .id(post.id)
                 }
             }
-            // Mostrar el título del post
-            Text(post.title)
+            Text(post.title)    //Post Title
                 .font(.headline)
                 .foregroundColor(Color.white)
-            // Descripción del post
-            Text(post.description)
+            Text(post.description)  //Post Description
                 .font(.subheadline)
                 .foregroundColor(Color.white)
-            
             HStack(spacing: 20) {
-                Button(action: {
+                Button(action: {    //Share Instagram Button
                     socialMediaSharing.shareToInstagram(post: post)
                 }) {
                     Text("SHARE INSTAGRAM")
                 }
                 .buttonStyle()
 
-                Button(action: {
+                Button(action: {    //Share Twitter Button
                     socialMediaSharing.shareToTwitter(post: post)
                 }) {
                     Text("SHARE\nX")
                 }
                 .buttonStyle()
 
-                Button(action: {
+                Button(action: {    //Download Button
                     viewModel.downloadContent(post: post)
                 }) {
                     Image(systemName: "arrow.down.circle")
